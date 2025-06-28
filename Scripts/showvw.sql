@@ -1,0 +1,6 @@
+SELECT 
+    TABLE_NAME AS ViewName
+FROM 
+    INFORMATION_SCHEMA.VIEWS
+WHERE 
+    TABLE_SCHEMA = DATABASE();  -- bieżąca baza danych
