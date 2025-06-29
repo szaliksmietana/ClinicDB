@@ -1,27 +1,31 @@
-DELIMITER //
-
-CREATE TRIGGER prevent_employee_overlap
-BEFORE INSERT ON appointments
-FOR EACH ROW
+-- Wyzwalacz sprawdzający nakładanie się wizyt pracowników
+CREATE TRIGGER trg_prevent_employee_overlap
+ON tbl_appointments
+FOR INSERT
+AS
 BEGIN
-    DECLARE overlap_count INT;
-
-    SELECT COUNT(*) INTO overlap_count
-    FROM appointments
+    SET NOCOUNT ON;
+    
+    DECLARE @overlap_count INT
+    DECLARE @employee_id BIGINT, @appointment_date DATETIME2, @duration_minutes INT
+    
+    SELECT @employee_id = employee_id, @appointment_date = appointment_date, @duration_minutes = duration_minutes
+    FROM inserted
+    
+    SELECT @overlap_count = COUNT(*)
+    FROM tbl_appointments
     WHERE
-        employee_id = NEW.employee_id
+        employee_id = @employee_id
         AND status = 'scheduled'
         AND (
-            NEW.appointment_date BETWEEN appointment_date AND DATE_ADD(appointment_date, INTERVAL duration_minutes MINUTE)
-            OR DATE_ADD(NEW.appointment_date, INTERVAL NEW.duration_minutes MINUTE) > appointment_date
-               AND NEW.appointment_date < DATE_ADD(appointment_date, INTERVAL duration_minutes MINUTE)
-        );
+            @appointment_date BETWEEN appointment_date AND DATEADD(MINUTE, duration_minutes, appointment_date)
+            OR DATEADD(MINUTE, @duration_minutes, @appointment_date) > appointment_date
+               AND @appointment_date < DATEADD(MINUTE, duration_minutes, appointment_date)
+        )
 
-    IF overlap_count > 0 THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Pracownik ma już zaplanowaną wizytę w tym czasie.';
-    END IF;
+    IF @overlap_count > 0
+    BEGIN
+        RAISERROR('Pracownik ma już zaplanowaną wizytę w tym czasie.', 16, 1)
+        ROLLBACK TRANSACTION
+    END
 END;
-//
-
-DELIMITER ;
