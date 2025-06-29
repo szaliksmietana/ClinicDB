@@ -1,122 +1,119 @@
 
--- Table adresów
-CREATE TABLE addresses (
-    address_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    city VARCHAR(100) NOT NULL,
-    postal_code VARCHAR(10) NOT NULL,
-    street VARCHAR(255) NOT NULL,
-    house_number VARCHAR(10) NOT NULL,
-    apartment_number VARCHAR(10),
-    PRIMARY KEY (address_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- Tabela adresów
+CREATE TABLE tbl_addresses (
+    address_id BIGINT IDENTITY(1,1) NOT NULL,
+    city NVARCHAR(100) NOT NULL,
+    postal_code NVARCHAR(10) NOT NULL,
+    street NVARCHAR(255) NOT NULL,
+    house_number NVARCHAR(10) NOT NULL,
+    apartment_number NVARCHAR(10),
+    CONSTRAINT PK_addresses PRIMARY KEY (address_id)
+);
 
 -- Tabela danych kontaktowych
-CREATE TABLE contacts (
-    contact_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    email VARCHAR(255) NOT NULL,
-    phone_number CHAR(9),
-    PRIMARY KEY (contact_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE tbl_contacts (
+    contact_id BIGINT IDENTITY(1,1) NOT NULL,
+    email NVARCHAR(255) NOT NULL,
+    phone_number NCHAR(9),
+    CONSTRAINT PK_contacts PRIMARY KEY (contact_id)
+);
 
 -- Tabela ról
-CREATE TABLE roles (
-    role_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    role_name VARCHAR(50) NOT NULL,
-    PRIMARY KEY (role_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE tbl_roles (
+    role_id BIGINT IDENTITY(1,1) NOT NULL,
+    role_name NVARCHAR(50) NOT NULL,
+    CONSTRAINT PK_roles PRIMARY KEY (role_id)
+);
 
 -- Tabela uprawnień
-CREATE TABLE permissions (
-    permission_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    permission_name VARCHAR(100) NOT NULL,
-    PRIMARY KEY (permission_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE tbl_permissions (
+    permission_id BIGINT IDENTITY(1,1) NOT NULL,
+    permission_name NVARCHAR(100) NOT NULL,
+    CONSTRAINT PK_permissions PRIMARY KEY (permission_id)
+);
 
 -- Tabela bazowa użytkowników
-CREATE TABLE users (
-    user_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    login VARCHAR(50) NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    first_name VARCHAR(100) NOT NULL,
-    last_name VARCHAR(100) NOT NULL,
-    pesel VARCHAR(11),
+CREATE TABLE tbl_users (
+    user_id BIGINT IDENTITY(1,1) NOT NULL,
+    login NVARCHAR(50) NOT NULL,
+    password NVARCHAR(255) NOT NULL,
+    first_name NVARCHAR(100) NOT NULL,
+    last_name NVARCHAR(100) NOT NULL,
+    pesel NVARCHAR(11),
     birth_date DATE,
-    gender CHAR(1),
-    is_forgotten TINYINT(1),
-    address_id INT,
-    contact_id INT,
-    access_level TINYINT NOT NULL,
-    PRIMARY KEY (user_id),
-    FOREIGN KEY (address_id) REFERENCES addresses(address_id),
-    FOREIGN KEY (contact_id) REFERENCES contacts(contact_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    gender NCHAR(1),
+    is_forgotten BIT DEFAULT 0,
+    address_id BIGINT,
+    contact_id BIGINT,
+    access_level TINYINT NOT NULL DEFAULT 0,
+    CONSTRAINT PK_users PRIMARY KEY (user_id),
+    CONSTRAINT FK_users_addresses FOREIGN KEY (address_id) REFERENCES tbl_addresses(address_id),
+    CONSTRAINT FK_users_contacts FOREIGN KEY (contact_id) REFERENCES tbl_contacts(contact_id)
+);
 
 -- Tabela pacjentów
-CREATE TABLE patients (
-    patient_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    user_id BIGINT UNSIGNED NOT NULL,
-    insurance_number VARCHAR(50),
-    PRIMARY KEY (patient_id),
-    UNIQUE (user_id),
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE tbl_patients (
+    patient_id BIGINT IDENTITY(1,1) NOT NULL,
+    user_id BIGINT NOT NULL,
+    insurance_number NVARCHAR(50),
+    CONSTRAINT PK_patients PRIMARY KEY (patient_id),
+    CONSTRAINT UQ_patients_user_id UNIQUE (user_id),
+    CONSTRAINT FK_patients_users FOREIGN KEY (user_id) REFERENCES tbl_users(user_id) ON DELETE CASCADE
+);
 
 -- Tabela pracowników
-CREATE TABLE employees (
-    employee_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    user_id BIGINT UNSIGNED NOT NULL,
-    job_title VARCHAR(100) NOT NULL,
+CREATE TABLE tbl_employees (
+    employee_id BIGINT IDENTITY(1,1) NOT NULL,
+    user_id BIGINT NOT NULL,
+    job_title NVARCHAR(100) NOT NULL,
     hire_date DATE,
     salary DECIMAL(10,2),
-    PRIMARY KEY (employee_id),
-    UNIQUE (user_id),
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    CONSTRAINT PK_employees PRIMARY KEY (employee_id),
+    CONSTRAINT UQ_employees_user_id UNIQUE (user_id),
+    CONSTRAINT FK_employees_users FOREIGN KEY (user_id) REFERENCES tbl_users(user_id) ON DELETE CASCADE
+);
 
 -- Tabela do zapomnianych użytkowników
-CREATE TABLE forgottenusers (
-    user_id BIGINT UNSIGNED NOT NULL,
-    is_forgotten TINYINT(1) DEFAULT 1,
-    random_data TEXT,
-    PRIMARY KEY (user_id),
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE tbl_forgottenusers (
+    user_id BIGINT NOT NULL,
+    is_forgotten BIT DEFAULT 1,
+    random_data NVARCHAR(MAX),
+    CONSTRAINT PK_forgottenusers PRIMARY KEY (user_id),
+    CONSTRAINT FK_forgottenusers_users FOREIGN KEY (user_id) REFERENCES tbl_users(user_id) ON DELETE CASCADE
+);
 
--- Tabela ról użytkowników
-CREATE TABLE user_roles (
-    user_role_id INT NOT NULL AUTO_INCREMENT,
-    user_id BIGINT UNSIGNED NOT NULL,
-    role_id BIGINT UNSIGNED NOT NULL,
-    PRIMARY KEY (user_role_id),
-    UNIQUE (user_id, role_id),
-    FOREIGN KEY (user_id) REFERENCES users(user_id),
-    FOREIGN KEY (role_id) REFERENCES roles(role_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE tbl_user_roles (
+    user_role_id INT IDENTITY(1,1) NOT NULL,
+    user_id BIGINT NOT NULL,
+    role_id BIGINT NOT NULL,
+    CONSTRAINT PK_user_roles PRIMARY KEY (user_role_id),
+    CONSTRAINT UQ_user_roles UNIQUE (user_id, role_id),
+    CONSTRAINT FK_user_roles_users FOREIGN KEY (user_id) REFERENCES tbl_users(user_id),
+    CONSTRAINT FK_user_roles_roles FOREIGN KEY (role_id) REFERENCES tbl_roles(role_id)
+);
 
 -- Tabela uprawnień ról
-CREATE TABLE role_permissions (
-    role_permission_id INT NOT NULL AUTO_INCREMENT,
-    role_id BIGINT UNSIGNED NOT NULL,
-    permission_id BIGINT UNSIGNED NOT NULL,
-    PRIMARY KEY (role_permission_id),
-    UNIQUE (role_id, permission_id),
-    FOREIGN KEY (role_id) REFERENCES roles(role_id),
-    FOREIGN KEY (permission_id) REFERENCES permissions(permission_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE tbl_role_permissions (
+    role_permission_id INT IDENTITY(1,1) NOT NULL,
+    role_id BIGINT NOT NULL,
+    permission_id BIGINT NOT NULL,
+    CONSTRAINT PK_role_permissions PRIMARY KEY (role_permission_id),
+    CONSTRAINT UQ_role_permissions UNIQUE (role_id, permission_id),
+    CONSTRAINT FK_role_permissions_roles FOREIGN KEY (role_id) REFERENCES tbl_roles(role_id),
+    CONSTRAINT FK_role_permissions_permissions FOREIGN KEY (permission_id) REFERENCES tbl_permissions(permission_id)
+);
 
--- Tabela wizyt
-CREATE TABLE appointments (
-    appointment_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    patient_id BIGINT UNSIGNED NOT NULL,
-    employee_id BIGINT UNSIGNED NOT NULL,
-    appointment_date DATETIME NOT NULL,
+CREATE TABLE tbl_appointments (
+    appointment_id BIGINT IDENTITY(1,1) NOT NULL,
+    patient_id BIGINT NOT NULL,
+    employee_id BIGINT NOT NULL,
+    appointment_date DATETIME2 NOT NULL,
     duration_minutes INT NOT NULL DEFAULT 30,
-    status ENUM('scheduled', 'completed', 'cancelled') NOT NULL DEFAULT 'scheduled',
-    notes TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status NVARCHAR(20) NOT NULL DEFAULT 'scheduled' CHECK (status IN ('scheduled', 'completed', 'cancelled')),
+    notes NVARCHAR(MAX),
+    created_at DATETIME2 DEFAULT GETDATE(),
     
-    PRIMARY KEY (appointment_id),
-    
-    FOREIGN KEY (patient_id) REFERENCES patients(user_id) ON DELETE CASCADE,
-    FOREIGN KEY (employee_id) REFERENCES employees(user_id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    CONSTRAINT PK_appointments PRIMARY KEY (appointment_id),
+    CONSTRAINT FK_appointments_patients FOREIGN KEY (patient_id) REFERENCES tbl_patients(user_id) ON DELETE CASCADE,
+    CONSTRAINT FK_appointments_employees FOREIGN KEY (employee_id) REFERENCES tbl_employees(user_id) ON DELETE CASCADE
+);
