@@ -1,4 +1,5 @@
-CREATE VIEW v_users_overview AS
+-- Widok przeglądu użytkowników
+CREATE VIEW vw_users_overview AS
 SELECT 
     u.user_id,
     u.login,
@@ -10,8 +11,8 @@ SELECT
         ELSE 'unknown'
     END AS user_type,
     u.is_forgotten,
-    fu.random_data IS NOT NULL AS anonymized
-FROM users u
-LEFT JOIN employees e ON u.user_id = e.user_id
-LEFT JOIN patients p ON u.user_id = p.user_id
-LEFT JOIN forgottenusers fu ON u.user_id = fu.user_id;
+    CASE WHEN fu.random_data IS NOT NULL THEN 1 ELSE 0 END AS anonymized
+FROM tbl_users u
+LEFT JOIN tbl_employees e ON u.user_id = e.user_id
+LEFT JOIN tbl_patients p ON u.user_id = p.user_id
+LEFT JOIN tbl_forgottenusers fu ON u.user_id = fu.user_id;
