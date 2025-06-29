@@ -1,39 +1,50 @@
--- Trigger do anonimizacji danych po oznaczeniu użytkownika jako zapomniany
-DELIMITER ;;
+-- Wyzwalacz do anonimizacji danych po oznaczeniu użytkownika jako zapomniany
 CREATE TRIGGER trg_anonymize_user
-BEFORE UPDATE ON users
-FOR EACH ROW
+ON tbl_users
+FOR UPDATE
+AS
 BEGIN
-    IF NEW.is_forgotten = TRUE AND OLD.is_forgotten = FALSE THEN
+    SET NOCOUNT ON;
+    
+    IF UPDATE(is_forgotten)
+    BEGIN
+        DECLARE @user_id BIGINT, @old_contact_id BIGINT, @old_address_id BIGINT
+        
+        SELECT @user_id = i.user_id, @old_contact_id = d.contact_id, @old_address_id = d.address_id
+        FROM inserted i
+        INNER JOIN deleted d ON i.user_id = d.user_id
+        WHERE i.is_forgotten = 1 AND d.is_forgotten = 0
 
-        -- Dodaj wpis do tabeli zapomnianych użytkowników
-        INSERT INTO forgottenusers (user_id, is_forgotten, random_data)
-        VALUES (OLD.user_id, TRUE, UUID());
+        IF @user_id IS NOT NULL
+        BEGIN
+            -- Dodaj wpis do tabeli zapomnianych użytkowników
+            INSERT INTO tbl_forgottenusers (user_id, is_forgotten, random_data)
+            VALUES (@user_id, 1, NEWID())
 
-        -- Anonimizacja danych użytkownika
-        SET NEW.login = CONCAT('deleted', OLD.user_id);
-        SET NEW.password = SHA2(RAND(), 256); -- silniejszy hash
-        SET NEW.first_name = 'Anon';
-        SET NEW.last_name = 'User';
-        SET NEW.pesel = NULL;
-        SET NEW.birth_date = NULL;
-        SET NEW.gender = NULL;
-        SET NEW.address_id = NULL;
-        SET NEW.contact_id = NULL;
-        SET NEW.access_level = 0;
+            -- Anonimizacja danych użytkownika
+            UPDATE tbl_users
+            SET 
+                login = 'deleted' + CAST(@user_id AS NVARCHAR(20)),
+                password = CONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', NEWID()), 2),
+                first_name = 'Anon',
+                last_name = 'User',
+                pesel = NULL,
+                birth_date = NULL,
+                gender = NULL,
+                address_id = NULL,
+                contact_id = NULL,
+                access_level = 0
+            WHERE user_id = @user_id
 
-        -- Usuwanie powiązań kontaktów i adresów (jeśli istnieją)
-        IF OLD.contact_id IS NOT NULL THEN
-            DELETE FROM contacts WHERE contact_id = OLD.contact_id;
-        END IF;
+            -- Usuwanie powiązań kontaktów i adresów (jeśli istnieją)
+            IF @old_contact_id IS NOT NULL
+                DELETE FROM tbl_contacts WHERE contact_id = @old_contact_id
 
-        IF OLD.address_id IS NOT NULL THEN
-            DELETE FROM addresses WHERE address_id = OLD.address_id;
-        END IF;
+            IF @old_address_id IS NOT NULL
+                DELETE FROM tbl_addresses WHERE address_id = @old_address_id
 
-        -- Usuwanie ról użytkownika
-        DELETE FROM user_roles WHERE user_id = OLD.user_id;
-    END IF;
-END ;;
-
-DELIMITER ;
+            -- Usuwanie ról użytkownika
+            DELETE FROM tbl_user_roles WHERE user_id = @user_id
+        END
+    END
+END;
