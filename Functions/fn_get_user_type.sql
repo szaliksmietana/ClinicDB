@@ -1,15 +1,16 @@
--- Funkcja: get_user_type
--- Zwraca 'employee', 'patient' lub 'unknown' na podstawie typu użytkownika.
-
-CREATE FUNCTION get_user_type(uid BIGINT UNSIGNED)
-RETURNS VARCHAR(20)
-DETERMINISTIC
+-- Funkcja zwracająca typ użytkownika
+CREATE FUNCTION uf_get_user_type(@uid BIGINT)
+RETURNS NVARCHAR(20)
+AS
 BEGIN
-    IF EXISTS (SELECT 1 FROM employees WHERE user_id = uid) THEN
-        RETURN 'employee';
-    ELSEIF EXISTS (SELECT 1 FROM patients WHERE user_id = uid) THEN
-        RETURN 'patient';
+    DECLARE @result NVARCHAR(20)
+    
+    IF EXISTS (SELECT 1 FROM tbl_employees WHERE user_id = @uid)
+        SET @result = 'employee'
+    ELSE IF EXISTS (SELECT 1 FROM tbl_patients WHERE user_id = @uid)
+        SET @result = 'patient'
     ELSE
-        RETURN 'unknown';
-    END IF;
+        SET @result = 'unknown'
+    
+    RETURN @result
 END;
