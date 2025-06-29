@@ -1,17 +1,11 @@
--- Procedura: reset_user_password
--- Ustawia nowe hasło SHA2(256) dla użytkownika o podanym ID.
-
-DELIMITER //
-
-CREATE PROCEDURE reset_user_password(
-    IN uid BIGINT UNSIGNED,
-    IN new_plain_password VARCHAR(100)
-)
+CREATE PROCEDURE reset_user_password
+    @uid BIGINT,
+    @new_plain_password NVARCHAR(100)
+AS
 BEGIN
-    UPDATE users
-    SET password = SHA2(new_plain_password, 256)
-    WHERE user_id = uid;
-END;
-//
+    SET NOCOUNT ON;
 
-DELIMITER ;
+    UPDATE users
+    SET password = CONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', @new_plain_password), 2)
+    WHERE user_id = @uid;
+END;

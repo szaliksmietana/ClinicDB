@@ -1,8 +1,16 @@
 CREATE TRIGGER trg_delete_user_cleanup
-AFTER DELETE ON users
-FOR EACH ROW
+ON tbl_users
+AFTER DELETE
+AS
 BEGIN
-    DELETE FROM user_roles WHERE user_id = OLD.user_id;
-    DELETE FROM contacts WHERE contact_id = OLD.contact_id;
-    DELETE FROM addresses WHERE address_id = OLD.address_id;
+    SET NOCOUNT ON;
+
+    DELETE FROM user_roles
+    WHERE user_id IN (SELECT user_id FROM deleted);
+
+    DELETE FROM contacts
+    WHERE contact_id IN (SELECT contact_id FROM deleted);
+
+    DELETE FROM addresses
+    WHERE address_id IN (SELECT address_id FROM deleted);
 END;

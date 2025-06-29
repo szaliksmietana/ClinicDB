@@ -25,7 +25,7 @@ BEGIN
             UPDATE tbl_users
             SET 
                 login = 'deleted' + CAST(@user_id AS NVARCHAR(20)),
-                password = CONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', NEWID()), 2),
+                password = CONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', CONVERT(NVARCHAR(36), NEWID())), 2),
                 first_name = 'Anon',
                 last_name = 'User',
                 pesel = NULL,
