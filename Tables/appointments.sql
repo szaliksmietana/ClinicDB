@@ -1,16 +1,14 @@
--- Tabela wizyt
-CREATE TABLE appointments (
-    appointment_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    patient_id BIGINT UNSIGNED NOT NULL,
-    employee_id BIGINT UNSIGNED NOT NULL,
-    appointment_date DATETIME NOT NULL,
+CREATE TABLE tbl_appointments (
+    appointment_id BIGINT IDENTITY(1,1) NOT NULL,
+    patient_id BIGINT NOT NULL,
+    employee_id BIGINT NOT NULL,
+    appointment_date DATETIME2 NOT NULL,
     duration_minutes INT NOT NULL DEFAULT 30,
-    status ENUM('scheduled', 'completed', 'cancelled') NOT NULL DEFAULT 'scheduled',
-    notes TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status NVARCHAR(20) NOT NULL DEFAULT 'scheduled' CHECK (status IN ('scheduled', 'completed', 'cancelled')),
+    notes NVARCHAR(MAX),
+    created_at DATETIME2 DEFAULT GETDATE(),
     
-    PRIMARY KEY (appointment_id),
-    
-    FOREIGN KEY (patient_id) REFERENCES patients(user_id) ON DELETE CASCADE,
-    FOREIGN KEY (employee_id) REFERENCES employees(user_id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    CONSTRAINT PK_appointments PRIMARY KEY (appointment_id),
+    CONSTRAINT FK_appointments_patients FOREIGN KEY (patient_id) REFERENCES tbl_patients(user_id) ON DELETE CASCADE,
+    CONSTRAINT FK_appointments_employees FOREIGN KEY (employee_id) REFERENCES tbl_employees(user_id) ON DELETE CASCADE
+);

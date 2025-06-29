@@ -1,6 +1,6 @@
 -- Tabela ról
-CREATE TABLE roles (
-    role_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    role_name VARCHAR(50) NOT NULL,
-    PRIMARY KEY (role_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE tbl_roles (
+    role_id BIGINT IDENTITY(1,1) NOT NULL,
+    role_name NVARCHAR(50) NOT NULL,
+    CONSTRAINT PK_roles PRIMARY KEY (role_id)
+);

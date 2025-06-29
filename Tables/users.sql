@@ -1,18 +1,18 @@
 -- Tabela bazowa użytkowników
-CREATE TABLE users (
-    user_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    login VARCHAR(50) NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    first_name VARCHAR(100) NOT NULL,
-    last_name VARCHAR(100) NOT NULL,
-    pesel VARCHAR(11),
+CREATE TABLE tbl_users (
+    user_id BIGINT IDENTITY(1,1) NOT NULL,
+    login NVARCHAR(50) NOT NULL,
+    password NVARCHAR(255) NOT NULL,
+    first_name NVARCHAR(100) NOT NULL,
+    last_name NVARCHAR(100) NOT NULL,
+    pesel NVARCHAR(11),
     birth_date DATE,
-    gender CHAR(1),
-    is_forgotten TINYINT(1),
-    address_id INT,
-    contact_id INT,
-    access_level TINYINT NOT NULL,
-    PRIMARY KEY (user_id),
-    FOREIGN KEY (address_id) REFERENCES addresses(address_id),
-    FOREIGN KEY (contact_id) REFERENCES contacts(contact_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    gender NCHAR(1),
+    is_forgotten BIT DEFAULT 0,
+    address_id BIGINT,
+    contact_id BIGINT,
+    access_level TINYINT NOT NULL DEFAULT 0,
+    CONSTRAINT PK_users PRIMARY KEY (user_id),
+    CONSTRAINT FK_users_addresses FOREIGN KEY (address_id) REFERENCES tbl_addresses(address_id),
+    CONSTRAINT FK_users_contacts FOREIGN KEY (contact_id) REFERENCES tbl_contacts(contact_id)
+);
