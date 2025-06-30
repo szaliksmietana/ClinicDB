@@ -5,7 +5,7 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    UPDATE users
+    UPDATE tbl_users
     SET password = CONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', @new_plain_password), 2)
     WHERE user_id = @uid;
 END;
