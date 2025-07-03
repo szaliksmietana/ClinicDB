@@ -9,3 +9,6 @@ CREATE INDEX idx_user_roles_role_id ON tbl_user_roles(role_id);
 
 -- Wyszukiwanie pacjenta po PESELu
 CREATE INDEX idx_users_pesel ON tbl_users(pesel);
+
+-- Unikalność adresu email
+CREATE UNIQUE INDEX idx_contacts_email_unique ON tbl_contacts(email);
