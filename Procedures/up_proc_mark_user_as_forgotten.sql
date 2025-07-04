@@ -1,3 +1,31 @@
+--------------------------------------------------------------------------------------
+--- PROCEDURE DEFINITION
+--- proc_mark_user_as_forgotten (@user_id BIGINT)
+--- CREATED BY: Oskar Sobczak
+--------------------------------------------------------------------------------------
+-- Procedura oznacza użytkownika jako zapomnianego w systemie. Sprawdza, czy użytkownik o podanym
+-- identyfikatorze istnieje, a następnie oznacza go jako zapomnianego, jeżeli wcześniej tego nie zrobił.
+-- Jeżeli użytkownik już został oznaczony jako zapomniany, procedura zwraca odpowiedni komunikat.
+--
+-- parametry wejściowe:
+-- @user_id - identyfikator użytkownika, który ma zostać oznaczony jako zapomniany
+--
+-- parametry wyjściowe/zwracane wartości:
+-- Brak wartości wyjściowych. Procedura wyświetla komunikaty o błędach lub potwierdzenia wykonania operacji.
+-- Komunikaty:
+-- - 'Użytkownik o podanym ID nie istnieje.'
+-- - 'Użytkownik już został oznaczony jako zapomniany.'
+-- - 'Użytkownik został oznaczony jako zapomniany.'
+--
+--
+-- /*
+-- Przykład użycia
+EXEC proc_mark_user_as_forgotten 123
+--
+-- Wynik działania
+-- Zwrócono komunikat: 'Użytkownik został oznaczony jako zapomniany.'
+......................................................................................
+
 CREATE OR ALTER PROCEDURE proc_mark_user_as_forgotten
     @user_id BIGINT
 AS

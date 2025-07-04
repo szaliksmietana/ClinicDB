@@ -1,4 +1,33 @@
--- Wyzwalacz do anonimizacji danych po oznaczeniu użytkownika jako zapomniany
+--------------------------------------------------------------------------------------
+--- TRIGGER DEFINITION
+--- trg_anonymize_user ON tbl_users FOR UPDATE
+--- CREATED BY: Filip Szymański
+--------------------------------------------------------------------------------------
+-- Wyzwalacz wykonuje anonimizację danych użytkownika po oznaczeniu go jako zapomnianego.
+-- Sprawdza, czy pole is_forgotten zostało zmienione na 1, a jeżeli tak, to przeprowadza proces
+-- anonimizacji danych użytkownika, w tym:
+-- 1. Dodaje wpis do tabeli tbl_forgottenusers.
+-- 2. Anonimizuje dane użytkownika (login, hasło, imię, nazwisko, pesel, data urodzenia).
+-- 3. Usuwa powiązania z tabelami kontaktów (tbl_contacts) i adresów (tbl_addresses).
+-- 4. Usuwa role użytkownika z tabeli tbl_user_roles.
+--
+-- parametry wejściowe:
+-- Brak parametrów wejściowych. Wyzwalacz jest uruchamiany automatycznie podczas aktualizacji
+-- rekordu w tabeli tbl_users, gdy pole is_forgotten zostaje zmienione na 1.
+--
+-- parametry wyjściowe/zwracane wartości:
+-- Brak. Wyzwalacz nie zwraca danych, ale wykonuje operacje modyfikacji danych w bazie.
+--
+--
+-- /*
+-- Przykład użycia
+-- Wyzwalacz uruchomi się automatycznie po zaktualizowaniu tabeli tbl_users, np.:
+-- UPDATE tbl_users SET is_forgotten = 1 WHERE user_id = 123
+--
+-- Wynik działania
+-- Zaktualizowano dane użytkownika, oznaczono go jako zapomnianego i przeprowadzono anonimizację danych.
+......................................................................................
+
 CREATE TRIGGER trg_anonymize_user
 ON tbl_users
 FOR UPDATE
